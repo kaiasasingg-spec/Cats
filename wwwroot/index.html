@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cats</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+        form { display: flex; gap: 8px; margin-bottom: 24px; }
+        input { flex: 1; padding: 8px; }
+        button { padding: 8px 14px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Каталог котів</h1>
+    <form id="form">
+        <input id="name" placeholder="Ім'я" required>
+        <input id="breed" placeholder="Порода" required>
+        <button type="submit">Додати</button>
+    </form>
+    <table>
+        <thead><tr><th>#</th><th>Ім'я</th><th>Порода</th><th></th></tr></thead>
+        <tbody id="list"></tbody>
+    </table>
+    <script>
+        const list = document.getElementById("list");
+        const form = document.getElementById("form");
+
+        async function load() {
+            const response = await fetch("/api/cats");
+            const cats = await response.json();
+            list.innerHTML = "";
+            cats.forEach((cat, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = "<td>" + (index + 1) + "</td><td></td><td></td><td></td>";
+                row.children[1].textContent = cat.name;
+                row.children[2].textContent = cat.breed;
+                const button = document.createElement("button");
+                button.textContent = "Видалити";
+                button.onclick = async () => {
+                    await fetch("/api/cats/" + cat.id, { method: "DELETE" });
+                    load();
+                };
+                row.children[3].appendChild(button);
+                list.appendChild(row);
+            });
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await fetch("/api/cats", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: document.getElementById("name").value,
+                    breed: document.getElementById("breed").value
+                })
+            });
+            form.reset();
+            load();
+        });
+
+        load();
+    </script>
+</body>
+</html>

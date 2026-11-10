@@ -1,0 +1,15 @@
+services:
+  cats:
+    build: .
+    image: kaiasasin/cats:latest
+    container_name: cats
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - DATA_DIR=/app/data
+    volumes:
+      - catsdata:/app/data
+
+volumes:
+  catsdata:
